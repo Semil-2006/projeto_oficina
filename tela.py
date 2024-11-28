@@ -53,6 +53,8 @@ class Tela(ctk.CTk):
             command=lambda: self.ver_senha.configure(show="" if self.mostrar_senha.get() else "*"))
         self.mostrar_senha.grid( pady=(10, 40), padx=90, )
 
+
+
         self.frame_botoes = ctk.CTkFrame(self, fg_color="transparent")
         self.frame_botoes.grid(row=6, column=0, pady=10)
 
@@ -101,12 +103,17 @@ class Tela(ctk.CTk):
 
         self.opcoes = ["Qual estado você nasceu?", "Qual é o nome do seu melhor amigo?",
                   "Qual o nome do seu primeiro animal?"]
-        combo_box = ctk.CTkComboBox(self, values=self.opcoes, width=275, height=38,
+        self.pergunta_seguranca = ctk.CTkComboBox(self, values=self.opcoes, width=275, height=38,
                                               font=("Arial", 25), state="readonly")
-        combo_box.grid(padx=15, pady=15)
+        self.pergunta_seguranca.grid(padx=15, pady=15)
+
+        self.resposta_segurança = ctk.CTkEntry(self, placeholder_text="Resposta")
+        self.resposta_segurança.grid()
+
+
 
         self.frame_botoes = ctk.CTkFrame(self, fg_color="transparent")
-        self.frame_botoes.grid(row=7, column=0, pady=10)
+        self.frame_botoes.grid(pady=10)
 
         self.botao_criar_conta = ctk.CTkButton(self.frame_botoes, text="Criar conta", font=("Century Gothic bold", 30),corner_radius=460)
         self.botao_criar_conta.grid(row=0,column=0,padx=8)
