@@ -1,11 +1,73 @@
 import customtkinter as ctk
 from PIL import Image, ImageTk
+import hashlib
+from banco_de_dados_login import Usuario,session
 
 class Tela(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.imagem_de_inicio = None
+        self.lb_imagem = None
+        self.texto_de_boas_vindas = None
+        self.ver_usuario = None
+        self.ver_senha = None
+        self.mostrar_senha = None
+        self.frame_botoes = None
+        self.botao_entrar = None
+        self.botao_cadastrar = None
+        self.texto_de_boas_vindas_cadastro = None
+        self.texto = None
+        self.criar_usuario = None
+        self.criar_senha = None
+        self.repetir_criar_senha = None
+        self.pergunta_seguranca = None
+        self.resposta_segurança = None
+        self.botao_criar_conta = None
+        self.botao_voltar = None
+        self.opcoes = None
         self._configurar_tela()
         self.criar_tela_login()
+
+    def cadastrar_usuario(self):
+        usuario = self.criar_usuario.get()
+        senha = self.criar_senha.get()
+        repetir_senha = self.repetir_criar_senha.get()
+        pergunta = self.pergunta_seguranca.get()
+        resposta = self.resposta_segurança.get()
+
+        if senha != repetir_senha:
+            print("Senhas não coincidem.")
+            return False
+
+        if not usuario or not senha or not pergunta or not resposta:
+            print("Todos os campos devem ser preenchidos.")
+            return False
+
+        novo_usuario = Usuario(
+            nome_usuario=usuario,
+            senha=senha,
+            pergunta_seguranca=pergunta,
+            resposta_seguranca=resposta
+        )
+
+        try:
+            session.add(novo_usuario)
+            session.commit()
+            print("Usuário cadastrado com sucesso!")
+            return True
+        except Exception as e:
+            session.rollback()
+            print(f"Erro ao cadastrar usuário: {e}")
+            return False  # Cadastro falhou
+
+    def funcao_do_cadastrar(self):
+        sucesso = self.cadastrar_usuario()
+
+        if sucesso:
+            self.criar_tela_login()
+
+
+
 
     def mostrar_senhas(self):
         show = "" if self.mostrar_senha.get() else "*"
@@ -33,7 +95,7 @@ class Tela(ctk.CTk):
         self.lb_imagem.grid(row=1, column=0, padx=105, pady=(40, 10))
 
         self.texto_de_boas_vindas = ctk.CTkLabel(self,text="Seja Bem Vindo",font=('Century Gothic bold',32),
-                                                 text_color="#FF0000",)
+                                                 text_color="#FF0000")
         self.texto_de_boas_vindas.grid()
 
 
@@ -107,7 +169,9 @@ class Tela(ctk.CTk):
                                               font=("Arial", 25), state="readonly")
         self.pergunta_seguranca.grid(padx=15, pady=15)
 
-        self.resposta_segurança = ctk.CTkEntry(self, placeholder_text="Resposta")
+        self.resposta_segurança = ctk.CTkEntry(self, placeholder_text="Resposta", font=('Century Gothic bold', 26),
+                                          width=250, height=40, justify="center", corner_radius=45, border_width=3,
+                                          border_color="black")
         self.resposta_segurança.grid()
 
 
@@ -115,7 +179,8 @@ class Tela(ctk.CTk):
         self.frame_botoes = ctk.CTkFrame(self, fg_color="transparent")
         self.frame_botoes.grid(pady=10)
 
-        self.botao_criar_conta = ctk.CTkButton(self.frame_botoes, text="Criar conta", font=("Century Gothic bold", 30),corner_radius=460)
+        self.botao_criar_conta = ctk.CTkButton(self.frame_botoes, text="Criar conta", font=("Century Gothic bold", 30),
+                                               corner_radius=460, command=self.funcao_do_cadastrar)
         self.botao_criar_conta.grid(row=0,column=0,padx=8)
 
         self.botao_voltar = ctk.CTkButton(self.frame_botoes,command=self.criar_tela_login, text="Voltar",font=("Century Gothic bold", 30),corner_radius=460)
@@ -130,14 +195,6 @@ class Tela(ctk.CTk):
 
         self.texto_de_boas_vindas = ctk.CTkLabel(self, text="Qual função deseja?", text_color="yellow", font=("Century Gothic bold", 32))
         self.texto_de_boas_vindas.grid(padx=60, pady=(25,0))
-
-
-
-
-
-
-
-
 
         self.botao_voltar = ctk.CTkButton(self, command=self.criar_tela_login, text="Voltar")
         self.botao_voltar.grid()
