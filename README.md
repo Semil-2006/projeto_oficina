@@ -91,5 +91,6 @@ Integração com API para consulta de preços de peças em tempo real.
 Dashboard para visualização gráfica do desempenho da oficina.
 Contribuições
 Contribuições são bem-vindas! Sinta-se à vontade para abrir uma issue ou enviar um pull request.
+faça git clone https://github.com/Semil-2006/projeto_oficina
 
 
