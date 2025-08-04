@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard de Engajamento</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { display: flex; flex-wrap: wrap; }
+        .card { 
+            background: #f5f5f5; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin: 10px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-width: 300px;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Painel de Engajamento da Live</h1>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Top 10 Participantes</h2>
+            <table>
+                <tr><th>Usuário</th><th>Pontos</th></tr>
+                {% for viewer in top_viewers %}
+                <tr><td>{{ viewer[0] }}</td><td>{{ viewer[1] }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+        
+        <div class="card">
+            <h2>Últimos Sorteios</h2>
+            <table>
+                <tr><th>Comando</th><th>Prêmio</th><th>Vencedor</th></tr>
+                {% for raffle in raffles %}
+                <tr>
+                    <td>{{ raffle[0] }}</td>
+                    <td>{{ raffle[1] }}</td>
+                    <td>{{ raffle[2] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        
+        <div class="card">
+            <h2>Atividade Recente</h2>
+            <table>
+                <tr><th>Usuário</th><th>Última Interação</th></tr>
+                {% for activity in recent_activity %}
+                <tr><td>{{ activity[0] }}</td><td>{{ activity[1][:19] }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+        
+        <div class="card">
+            <canvas id="pointsChart" width="400" height="300"></canvas>
+        </div>
+    </div>
+
+    <script>
+        fetch('/data')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('pointsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(item => item.username),
+                        datasets: [{
+                            label: 'Pontos de Engajamento',
+                            data: data.map(item => item.points),
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+</body>
+</html>

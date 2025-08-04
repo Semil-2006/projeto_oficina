@@ -8,7 +8,6 @@ from fpdf import FPDF
 from tkinter import filedialog, Tk
 import tkinter as tk
 from banco_de_dados_de_servicos import Peca,seccao
-
 from tkinter import Canvas, Scrollbar
 from banco_de_dados_oficina_servicos import Servico, sessio
 import customtkinter as ctk
@@ -197,6 +196,12 @@ class Tela(ctk.CTk):
         self.ver_clientes = ctk.CTkButton(self,text="Ver Cliente",font=("Century Gothic bold", 42),width=400,corner_radius=360,command=self.criar_tela_ver_cliente)
         self.ver_clientes.grid(pady=(50,0))
 
+        self.vol = ctk.CTkButton(self,text="Voltar",font=("Century Gothic bold", 32),
+                                                corner_radius=360,command=self.criar_tela_entrar)
+        self.vol.grid(pady=(175,0),padx=30)
+
+
+
     def criar_tela_entrar(self):
         self.limpar_tela()
 
@@ -230,7 +235,7 @@ class Tela(ctk.CTk):
         calendario_popup.geometry("300x300")
 
         calendario = Calendar(calendario_popup, selectmode='day', date_pattern='yyyy-mm-dd')
-        calendario.pack(padx=10, pady=10)
+        calendario.grid(padx=10, pady=10)
 
         def selecionar_data():
             data_selecionada = calendario.get_date()
@@ -239,7 +244,7 @@ class Tela(ctk.CTk):
             calendario_popup.destroy()
 
         botao_confirmar = ctk.CTkButton(calendario_popup, text="Confirmar", command=selecionar_data)
-        botao_confirmar.pack(pady=10)
+        botao_confirmar.grid(pady=10)
 
     def abrir_calendariofim(self, event):
         calendario_popup = tk.Toplevel(self)
@@ -247,7 +252,7 @@ class Tela(ctk.CTk):
         calendario_popup.geometry("300x300")
 
         calendario = Calendar(calendario_popup, selectmode='day', date_pattern='yyyy-mm-dd')
-        calendario.pack(padx=10, pady=10)
+        calendario.grid(padx=10, pady=10)
 
         def selecionar_data():
             data_selecionada = calendario.get_date()
@@ -256,7 +261,7 @@ class Tela(ctk.CTk):
             calendario_popup.destroy()
 
         botao_confirmar = ctk.CTkButton(calendario_popup, text="Confirmar", command=selecionar_data)
-        botao_confirmar.pack(pady=10)
+        botao_confirmar.grid(pady=10)
 
     def atualizar_interface(self):
         opcao = self.opcao_selecionada.get()
@@ -991,30 +996,30 @@ class Tela(ctk.CTk):
         self.label = ctk.CTkLabel(self, text="Bem-vindo à tela de serviços",
                                   font=("Century Gothic bold", 24),
                                   text_color="yellow")
-        self.label.pack(pady=(20, 10))
+        self.label.grid(pady=(20, 10))
 
         self.botao_cadastrar = ctk.CTkButton(self, text="Cadastrar Serviço",
                                              font=("Century Gothic bold", 18),
                                              width=300, corner_radius=15,
                                              command=self.tela_cadastrar_servico)
-        self.botao_cadastrar.pack(pady=10)
+        self.botao_cadastrar.grid(pady=10)
 
         self.botao_lista_servicos = ctk.CTkButton(self, text="Listar Serviços",
                                                   font=("Century Gothic bold", 18),
                                                   width=300, corner_radius=15,
                                                   command=self.tela_listar_servicos)
-        self.botao_lista_servicos.pack(pady=10)
+        self.botao_lista_servicos.grid(pady=10)
 
         self.botao_clientes_servicos = ctk.CTkButton(self, text="Clientes/Serviços",
                                                      font=("Century Gothic bold", 18),
                                                      width=300, corner_radius=15,
                                                      command=self.tela_clientes_servicos)
-        self.botao_clientes_servicos.pack(pady=10)
+        self.botao_clientes_servicos.grid(pady=10)
 
         self.botao_sair = ctk.CTkButton(self, text="Voltar", font=("Century Gothic bold", 18),
                                         width=300, corner_radius=15,
                                         command=self.criar_tela_entrar)
-        self.botao_sair.pack(pady=10)
+        self.botao_sair.grid(pady=10)
 
     def tela_cadastrar_servico(self):
         self.limpar_tela()
@@ -1179,20 +1184,21 @@ class Tela(ctk.CTk):
             self.botao_voltar.pack(pady=5)
 
     def formatar_valor(self, event):
-        texto = self.entry_valor.get()
+        campo = None
 
-        if texto.startswith("R$"):
-            texto = texto[2:]
+        if hasattr(self, "entry_valor"):
+            campo = self.entry_valor
+        elif hasattr(self, "valor"):
+            campo = self.valor
 
-        texto = ''.join(c for c in texto if c.isdigit())
-
-        if not texto:
-            texto = "0"
-
-        valor = int(texto) / 100
-
-        self.entry_valor.delete(0, ctk.END)
-        self.entry_valor.insert(0, f"R${valor:,.2f}".replace(",", "."))  # Garantir ponto decimal
+        if campo:
+            texto = campo.get()
+            texto = re.sub(r'\D', '', texto)
+            if not texto:
+                texto = "0"
+            valor = int(texto) / 100
+            campo.delete(0, ctk.END)
+            campo.insert(0, f"R${valor:,.2f}".replace(",", "."))
 
     def salvar_edicao(self, cliente):
         try:
@@ -1215,7 +1221,7 @@ class Tela(ctk.CTk):
     def mostrar_sucesso(self, mensagem):
         self.label_sucesso = ctk.CTkLabel(self, text=mensagem, text_color="green",
                                           font=("Century Gothic", 14))
-        self.label_sucesso.pack(pady=(10, 0))
+        self.label_sucesso.grid(pady=(10, 0))
         self.after(3000, self.label_sucesso.destroy )
 
 
