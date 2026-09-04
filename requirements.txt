@@ -1,0 +1,25 @@
+# Sistema de Gerenciamento para Oficina PWS - dependências
+# Instale com: pip install -r requirements.txt
+
+# --- Interface gráfica ---
+customtkinter>=5.2.0
+Pillow>=10.0.0
+tkcalendar>=1.6.1
+
+# --- Banco de dados ---
+SQLAlchemy>=2.0.0
+
+# --- Segurança ---
+bcrypt>=4.0.0
+passlib>=1.7.4
+
+# --- Geração de PDF ---
+fpdf2>=2.7.0
+
+# --- Testes ---
+pytest>=7.0.0
+pytest-cov>=4.0.0
+coverage>=7.0.0
+
+# --- Testes de carga ---
+locust>=2.15.0

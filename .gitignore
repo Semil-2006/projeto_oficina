@@ -1,0 +1,34 @@
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.coverage.*
+
+# Banco de dados gerados em tempo de execução
+*.db
+*.sqlite
+*.sqlite3
+
+# Relatórios/PDFs gerados
+pws/relatorios/
+orcamento.pdf
+
+# Logs
+*.log
+
+# Sistemas operacionais
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

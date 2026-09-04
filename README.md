@@ -1,96 +1,198 @@
-# Sistema de Gerenciamento para Oficina PWS
+# 🚗 Sistema de Gerenciamento para Oficina PWS
 
-Este projeto é um sistema de gerenciamento desenvolvido para atender às necessidades diárias da oficina PWS, otimizando tarefas como cadastro de usuários, clientes, serviços, estoque e geração de relatórios. A interface gráfica foi implementada com `CustomTkinter`, enquanto o banco de dados utiliza SQLAlchemy para manipulação dos dados.
+Sistema desktop para gestão de uma oficina mecânica: **usuários, clientes,
+serviços, estoque e relatórios de faturamento**, com geração de orçamentos em
+PDF.
 
-## Funcionalidades Principais
+> Versão **2.0** — refatorada para uma arquitetura **limpa e testável**, com a
+> lógica de negócio desacoplada da interface gráfica. O código original está
+> preservado em [`legado/`](legado/README.md).
 
-- **Tela de Login e Cadastro de Usuários**:
-  - Cadastro com validação de senha e perguntas de segurança.
-  - Login com autenticação segura utilizando hashing de senhas.
-  
-- **Gestão de Clientes**:
-  - Cadastro de clientes com validação de dados (nome, CPF, e-mail, telefone, etc.).
-  - Listagem, edição e exclusão de clientes.
-  - Impressão de orçamentos em formato PDF.
+---
 
-- **Gerenciamento de Serviços**:
-  - Cadastro de serviços realizados na oficina.
-  - Associação de serviços aos clientes e seus veículos.
+## ✨ Funcionalidades
 
-- **Controle de Estoque**:
-  - Cadastro e edição de peças disponíveis.
-  - Consulta de peças em estoque com busca e filtros.
+- **Autenticação**
+  - Cadastro de usuários com **hash bcrypt** e pergunta de segurança (a resposta
+    também é hasheada — corrige vulnerabilidade da versão original).
+  - Login seguro, recuperação e redefinição de senha.
+- **Clientes**
+  - Cadastro com validação (CPF, e-mail, telefone, placa).
+  - Listagem, busca, paginação e edição.
+  - Impressão de orçamento em **PDF**.
+- **Serviços**
+  - Cadastro, listagem e exclusão de serviços da oficina.
+- **Estoque**
+  - Adicionar peças (acumula quantidade quando a peça já existe), listar e editar.
+- **Relatórios**
+  - Relatórios **diário, mensal e anual** com total faturado, total pendente e
+    dia/mês mais movimentado.
 
-- **Relatórios**:
-  - Relatórios diários, mensais e anuais com resumo de faturamento e pendências.
+---
 
-## Tecnologias Utilizadas
+## 🏗️ Arquitetura
 
-- **Linguagem**: Python
-- **Bibliotecas Gráficas**: CustomTkinter
-- **Banco de Dados**: SQLAlchemy
-- **Geração de PDF**: FPDF
+```
+projeto_oficina/
+├── main.py                    # Ponto de entrada (executa a interface)
+├── requirements.txt           # Dependências
+├── pyproject.toml             # Config do pytest/coverage
+├── pws/                       # Pacote principal
+│   ├── config.py              # Caminhos e configuração de ambiente
+│   ├── database.py            # Engine/sessões SQLAlchemy (SQLite)
+│   ├── models.py              # Modelos ORM: Usuario, Cliente, Peca, Servico
+│   ├── validators.py          # Validação de CPF, e-mail, telefone, placa, valor
+│   ├── formatadores.py        # Formatação de telefone, placa, CPF, valor
+│   ├── pdf.py                 # Geração de orçamento em PDF (FPDF)
+│   ├── services/              # 🧠 Lógica de negócio (desacoplada da UI)
+│   │   ├── auth_service.py        # Cadastro, login, recuperação de senha
+│   │   ├── cliente_service.py     # CRUD de clientes + busca/paginação
+│   │   ├── estoque_service.py     # Gestão de peças
+│   │   ├── servico_service.py     # CRUD de serviços
+│   │   └── relatorio_service.py   # Relatórios diário/mensal/anual
+│   └── ui/
+│       └── app.py             # Interface gráfica (CustomTkinter)
+├── tests/
+│   ├── conftest.py            # Fixtures (banco isolado em memória)
+│   ├── unit/                  # Testes unitários (97% de cobertura)
+│   ├── integration/           # Testes de integração (fluxo completo)
+│   └── load/                  # Testes de carga/estresse + benchmark
+├── docs/                      # Documentação detalhada
+└── legado/                    # Código-fonte original (arquivado)
+```
 
-- ## Pilares de POO Utilizados
+### Principio-chave: separação de responsabilidades
 
-### 1. **Herança**
-A classe `Tela` herda de `ctk.CTk` (CustomTkinter), permitindo o reaproveitamento e extensão das funcionalidades do framework.
+A **interface** (`pws/ui/app.py`) apenas coleta entrada e exibe resultado.
+Toda regra de negócio — validação, hashing, persistência, cálculo de
+relatórios — vive em `pws/services/`, `pws/validators.py`,
+`pws/formatadores.py` e `pws/pdf.py`, **independentes do tkinter**. Isso
+permite testar a lógica de forma unitária, sem abrir uma janela.
 
-Exemplo:
-class Tela(ctk.CTk):
-    def __init__(self):
-        super().__init__()
-2. Encapsulamento
-Os métodos e atributos são organizados para restringir acesso direto a dados sensíveis. Por exemplo, métodos como _configurar_tela são utilizados internamente pela classe.
+---
 
-Exemplo:
+## 🚀 Como executar
 
-python
-Copiar código
-def _configurar_tela(self):
-    ...
-3. Serialização
-O projeto utiliza a serialização para armazenar objetos no banco de dados de forma estruturada. Isso é feito através do SQLAlchemy, onde objetos como Cliente e Servico são convertidos para persistência.
+### 1. Criar ambiente virtual (recomendado)
 
-Exemplo:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate       # Linux/macOS
+# ou .venv\Scripts\activate     # Windows
+```
 
-python
-Copiar código
-novo_cliente = Cliente(**cliente_data)
-secao.add(novo_cliente)
-secao.commit()
+> No Linux, se o tkinter não estiver disponível:
+> `sudo apt-get install python3-tk`
 
-## Como Instalar as Dependências
+### 2. Instalar dependências
 
-1. Certifique-se de ter o **Python 3.8+** instalado em sua máquina.
-2. Instale as bibliotecas necessárias com o seguinte comando:
-   pip install pillow bcrypt fpdf tkcalendar customtkinter sqlalchemy
+```bash
+pip install -r requirements.txt
+```
 
-Caso algum dos pacotes nativos do Python não esteja disponível em sua instalação (como tkinter ou datetime), certifique-se de ter instalado o Tkinter e atualizado seu ambiente Python.
+### 3. Rodar a aplicação
 
-Windows: Tkinter já está incluído na instalação padrão do Python.
-Linux: Caso o Tkinter não esteja disponível, instale com:
-bash
-Copiar código
-sudo apt-get install python3-tk
-Estrutura do Projeto
-bash
-Copiar código
-├── main.py                # Arquivo principal
-├── banco_de_dados/        # Modelos e conexões do banco de dados
-├── imagens/               # Imagens utilizadas no projeto
-├── relatorios/            # Relatórios gerados
-└── README.md              # Documentação do projeto
-Como Executar o Projeto
-Após instalar as dependências, execute o sistema com o comando:
-bash
-Copiar código
+```bash
 python main.py
-Funcionalidades Futuras
-Integração com API para consulta de preços de peças em tempo real.
-Dashboard para visualização gráfica do desempenho da oficina.
-Contribuições
-Contribuições são bem-vindas! Sinta-se à vontade para abrir uma issue ou enviar um pull request.
-faça git clone https://github.com/Semil-2006/projeto_oficina
+```
 
+A janela **Sistema de Gerenciamento - Oficina PWS** será exibida. Faça login,
+cadastre-se ou recupere a senha pela pergunta de segurança.
 
+---
+
+## 🧪 Testes
+
+### Testes unitários e de integração (conjunto padrão)
+
+```bash
+python -m pytest                      # 137 testes (unit + integração)
+```
+
+### Cobertura de código
+
+```bash
+python -m pytest --cov=pws --cov-report=html
+```
+
+> **Cobertura da lógica de negócio: 97%** (acima da meta de 90%).
+> O relatório HTML fica em `htmlcov/`.
+
+### Testes de carga e estresse
+
+Marcados com `@pytest.mark.carga` (não entram no conjunto padrão):
+
+```bash
+python -m pytest tests/load -m carga -s
+```
+
+Benchmark rápido de linha de comando:
+
+```bash
+python -m tests.load.benchmark 20000
+```
+
+Resultados obtidos (20.000 registros):
+
+| Operação                          |  Tempo  |         Taxa |
+|-----------------------------------|--------:|-------------:|
+| Inserção em massa (bulk)          |   2.34s |   8.534 reg/s |
+| Consulta + paginação              |  0.021s |        48/s  |
+| Relatório anual (2025)            |  0.538s | 20.000 cli.  |
+| Estoque — adicionar peça          | 0.0054s |      185/s   |
+
+---
+
+## 🐛 Bugs corrigidos nesta versão
+
+1. **Caminho absoluto da imagem** — `definicoes.py`, `tela.py` e o módulo de
+   clientes usavam `/home/semil/Área de Trabalho/oficina/img_do_carro.png`,
+   quebrando o app em qualquer outra máquina. ✅ Agora usa path relativo
+   (`pws/config.py`).
+2. **Resposta de segurança em texto puro** — comparada e armazenada sem hash.
+   ✅ Agora hasheada com bcrypt e comparada de forma segura.
+3. **Duplicação de métodos e telas** — `limpar_tela`, `mostrar_erro`, etc.
+   definidos duas vezes; inicialização fora de ordem instável. ✅ Código
+   consolidado e ordenado.
+4. **`ofi/main.py` quebrado** — importava módulos inexistentes. ✅ Removido do
+   código ativo e arquivado.
+5. **`goo.py` não relacionado** — bot de YouTube poluindo o repositório.
+   ✅ Isolado em `legado/`.
+6. **Banco disperso em 4 arquivos + dados de teste commitados** —
+   ✅ Consolidado em um gerenciador único; bancos e cache ignorados pelo `.gitignore`.
+7. **Sem `requirements.txt`** — ✅ Adicionado para reprodutibilidade.
+8. **Validações no tkinter (não testáveis)** — ✅ Extraídas para módulos puros.
+
+---
+
+## 🧑‍💻 Pilares de POO
+
+- **Herança**: `Tela(ctk.CTk)`, `Usuario(Base)`, `ResumoRelatorio` (dataclass).
+- **Encapsulamento**: senha e resposta de segurança protegidas (não podem ser
+  lidas diretamente).
+- **Abstração**: serviços expõem operações de alto nível, escondendo o ORM.
+- **Polimorfismo**: `Cliente.esta_pago()` e reuso dos serviços pela UI.
+
+---
+
+## 📄 Documentação adicional
+
+- [Diagnóstico completo (bugs encontrados)](docs/DIAGNOSTICO.md)
+- [Guia de testes e cobertura](docs/TESTES.md)
+- [Notas de carga/estresse](docs/CARGA.md)
+
+---
+
+## 🔮 Funcionalidades futuras (roadmap)
+
+- API REST para consulta de preços de peças em tempo real.
+- Dashboard gráfico de desempenho da oficina.
+- Autenticação com mais fatores (2FA).
+
+---
+
+## 👥 Contribuições
+
+Contribuições são bem-vindas! Abra uma *issue* ou envie um *pull request*.
+
+Repositório: `https://github.com/Semil-2006/projeto_oficina`
